@@ -1,0 +1,98 @@
+<?php
+//{{block type="core/template" show_total="4" name="product_featured" as="product_featured" template="catalog/product/featured.phtml}}
+
+
+
+$totalPerPage = ($this->show_total) ? $this->show_total : 12;
+$visibility = array(
+                      Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH,
+                      Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_CATALOG
+                  );
+
+$storeId = Mage::app()->getStore()->getId();
+
+$_productCollection = Mage::getResourceModel('reports/product_collection')
+						->addAttributeToSelect('*')     
+					    ->setStoreId($storeId)
+                        ->addStoreFilter($storeId)	
+					    ->addAttributeToFilter('visibility', $visibility)
+						->addAttributeToFilter('featured', true)
+						->setOrder('created_at', 'desc')
+						->addAttributeToSelect('status') 
+						->setPageSize($totalPerPage);
+Mage::getSingleton('catalog/product_status')->addVisibleFilterToCollection($_productCollection);
+Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($_productCollection);
+Mage::getSingleton('catalog/product_visibility')->addVisibleInSearchFilterToCollection($_productCollection);
+
+
+// // if product is part of configurable product get first parent product
+// $junkProducts = new Varien_Data_Collection();
+// foreach ($_productCollection as $k => $p) {
+	// $p = $p->loadParentProductIds();
+	// $parentIds = $p->getData('parent_product_ids');	
+	// if (is_array($parentIds) && !empty($parentIds)) {
+		// if (!$junkProducts->getItemById($parentIds[0])) {
+			// $parentProduct = Mage::getModel('catalog/product')->setStoreId($storeId)->load($parentIds[0]);
+			// if ($parentProduct->isVisibleInCatalog()) {
+				// $junkProducts->addItem($parentProduct);
+			// }
+		// }
+	// } else {
+		// if (!$junkProducts->getItemById($k)) {
+			// $junkProducts->addItem($p);
+		// }
+	// }		
+// }
+// $_productCollection = $junkProducts;
+// //end if product is part of configurable product get first parent product
+?>
+<div class="listing-type-grid catalog-listing">
+<?php $_collectionSize = $_productCollection->count() ?>
+    
+    <?php $_columnCount = $this->getColumnCount(); if (!$_columnCount) $_columnCount = 3;?>
+    <?php $i=0; foreach ($_productCollection as $_product): ?>
+        <?php if($i%$_columnCount==0): ?>
+    <ol class="grid-row">
+    <?php endif ?>
+        <li class="item <?php echo ($i++%$_columnCount==0)? 'first' : '' ?>">
+		<div class="boxgrid caption">
+		
+            <p class="product-image">
+                <a href="<?php echo $_product->getProductUrl() ?>" title="<?php echo $this->htmlEscape($this->getImageLabel($_product, 'small_image')) ?>">
+                    <img src="<?php echo $this->helper('catalog/image')->init($_product, 'small_image')->resize(212, 159); ?>" alt="<?php echo $this->htmlEscape($this->getImageLabel($_product, 'small_image')) ?>" title="<?php echo $this->htmlEscape($this->getImageLabel($_product, 'small_image')) ?>" />
+                </a>
+            </p>
+			<div class="new_image"></div>
+			<div class="cover boxcaption">
+				<div class="group_box">
+				
+				
+					<?php if ($_product->getSpecialPrice()>0):?>
+						<div class="box_price">	
+							<span class="old"><?php echo $this->helper('checkout')->formatPrice($_product->getPrice()) ?></span>&nbsp;
+							<span class="new"><?php echo $this->helper('checkout')->formatPrice($_product->getSpecialPrice()) ?></span>
+						</div>
+					<?php else: ?>
+						<div class="box_price">	<span class="new"><?php echo $this->helper('checkout')->formatPrice($_product->getPrice()) ?></span></div>
+					<?php endif; ?>
+					<div class="box_adtocat">	
+						<a href="<?php echo  Mage::helper('checkout/cart')->getAddUrl($_product);?>">
+						<?php echo $this->__('Add to Cart') ?></a>
+					</div>
+					<div class="clear_both"></div>
+				</div>
+				
+				<h3><a href="<?php echo $_product->getProductUrl() ?>" title="<?php echo $this->htmlEscape($_product->getName()) ?>"><?php echo $this->htmlEscape($_product->getName()) ?></a></h3>
+			</div>
+		</div>
+        </li>  
+	<?php if($i%$_columnCount==0 || $i==$_collectionSize): ?>
+        </ol>
+        <?php endif; ?>
+    <?php endforeach ?>
+    <script type="text/javascript">decorateGeneric($$('.grid-row'), ['last', 'odd', 'even']);</script>
+    
+    <script type="text/javascript">decorateTable('product-list-table')</script>
+</div>
+
+
