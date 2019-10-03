@@ -1,7 +1,7 @@
 {
-    "name": "OpenMageModuleFostering\/mw_mapple",
+    "name": "openmage-module-fostering\/mw_mapple",
     "type": "magento-module",
-    "license": "Open-Software-License-(OSL)",
+    "license": "OSL-3.0",
     "homepage": "",
     "description": "With the purpose of support your e-business for free, Mage-World is glad to introduce new free theme mApple. This Magento theme has the advantage of clean and clear design which is suitable for wide variety of products.",
     "authors": [
